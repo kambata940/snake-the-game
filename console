@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+
+require_relative 'console_runner'
+ConsoleRunner.call
