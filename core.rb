@@ -48,15 +48,14 @@ class Snake
 
   def initialize(size, direction: :right)
     @direction = direction
-    @body = 0.upto(size - 1).map { |i| [i, 0] } # array of coordinates [x,y]
+    @body = Array.new(size) { |i| [i, 0] } # array of coordinates [x,y]
     @trace = [] # stack of coordinates [x, y]
   end
 
   def move(new_direction = nil)
     @direction = new_direction if new_direction
-    offset_x, offset_y = OFFSET_BY_DIRECTION[direction]
-    head_x, head_y = head
-    new_head = [head_x + offset_x, head_y + offset_y]
+
+    new_head = next_head
 
     body.push(new_head)
     trace.push(body.shift)
@@ -74,6 +73,13 @@ class Snake
 
   def head
     body.last
+  end
+
+  def next_head
+    offset_x, offset_y = OFFSET_BY_DIRECTION[direction]
+    head_x, head_y = head
+
+    [head_x + offset_x, head_y + offset_y]
   end
 end
 
