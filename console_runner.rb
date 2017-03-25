@@ -1,58 +1,63 @@
-require 'timeout'
-require 'io/console'
-
 require_relative 'core'
 require_relative 'draw'
+require_relative 'raw_console'
 
-module ConsoleRunner
+class ConsoleRunner
   KEYS_MAPPING = {
     'a' => :left,
     'd' => :right,
     's' => :down,
-    'w' => :up
+    'w' => :up,
+    'q' => :quit
   }.freeze
 
-  class << self
-    def call
-      game = Game.new
+  FRAMES_PER_SECOND = 10
+
+  def self.call
+    new.call
+  end
+
+  def call
+    RawConsole.new do |console|
       game.start
 
-      initial_countdown
+      initial_countdown(console)
 
       loop do
-        draw(game)
-        command = wait(0.1) { STDIN.getch }
-        direction = KEYS_MAPPING[command.to_s]
+        sleep 1.0 / FRAMES_PER_SECOND
 
-        direction ? game.move(direction) : game.next
+        command = pluck_command(console)
+        break if command == 'quit'
+
+        command ? game.move(command) : game.next
+        draw(console)
       end
     end
+  end
 
-    def initial_countdown
-      system('clear')
+  private
 
-      3.downto(1).each do |i|
-        puts i
-        sleep 1
-      end
+  def game
+    @game ||= Game.new
+  end
+
+  def initial_countdown(console)
+    system('clear')
+
+    3.downto(1).each do |i|
+      console.puts i
+      sleep 1
     end
+  end
 
-    def draw(game)
-      system('clear')
-      puts Draw.new(game)
-    end
+  def draw(console)
+    system('clear')
+    console.puts Draw.new(game)
+  end
 
-    def wait(seconds)
-      start_time = Time.new
-      result = Timeout.timeout(seconds) { yield }
-      end_time = Time.new
+  def pluck_command(console)
+    last_key = console.last_char!
 
-      time_diff = end_time.to_f - start_time.to_f
-      sleep seconds - time_diff
-
-      result
-    rescue Timeout::Error
-      nil
-    end
+    KEYS_MAPPING[last_key.to_s]
   end
 end
