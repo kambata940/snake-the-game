@@ -11,7 +11,7 @@ class ConsoleRunner
     'q' => :quit
   }.freeze
 
-  FRAMES_PER_SECOND = 10
+  SPEED_LEVEL = 2 # possible values: [1, 2, 3]
 
   def self.call
     new.call
@@ -23,14 +23,17 @@ class ConsoleRunner
 
       initial_countdown(console)
 
-      loop do
-        sleep 1.0 / FRAMES_PER_SECOND
+      command = nil
+      each_frame do |tick|
+        last_command = pluck_command(console)
+        command = last_command if last_command
 
-        command = pluck_command(console)
-        break if command == 'quit'
+        break if command == :quit
 
-        command ? game.move(command) : game.next
-        draw(console)
+        if (tick % SPEED_LEVEL).zero?
+          command ? game.move(command) : game.next
+          draw(console)
+        end
       end
     end
   end
@@ -39,6 +42,16 @@ class ConsoleRunner
 
   def game
     @game ||= Game.new
+  end
+
+  def each_frame
+    tick = 0
+    loop do
+      sleep 1.0 / 24
+      yield(tick % 24 + 1)
+
+      tick += 1
+    end
   end
 
   def initial_countdown(console)
