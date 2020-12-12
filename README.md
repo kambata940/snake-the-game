@@ -1,6 +1,12 @@
 # snake-the-game
 
-## Play
+## Run the ruby version
+
+Start the game:
+
+```bash
+./ruby/console
+```
 
 Controls:
  - *w* - Up
@@ -9,8 +15,3 @@ Controls:
  - *d* - Right
  - *q* - Quit
 
-Start the game:
-
-```bash
-./console
-```
